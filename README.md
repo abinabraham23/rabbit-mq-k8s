@@ -5,6 +5,7 @@ Repository includes K8s resources and simple java program (sender-receiver) to t
 
 1. **Namespace**
 Create a dedicated namespace to keep the RabbitMQ objects separately from other k8s objects in a cluster. It also helps with better management of access & permissions on the R-MQ related objects. 
+
 `kubectl apply -f namespace.yml`
 
 2. **RBAC**
@@ -12,18 +13,22 @@ R-MQ’s Kubernetes peer discovery plugin relies on Kubernetes API as data sourc
 The plugin requires the following access to Kubernetes resources:
 * get access to the endpoints resources
 * create access to the events resources.
+
 Specify a role, role-binding, and service account to configure this access.
+
 `kubectl apply -f rbac.yml`
 
 3. **Service**
 The Stateful Set definition can reference a Service which gives the Pods of the Stateful Set their network identity. This is required by RabbitMQ for clustering, and as mentioned in the Kubernetes documentation, has to be created before the Stateful Set. 
 RabbitMQ uses port 4369 for node discovery and port 25672 for inter-node communication. Since this Service is used internally and does not need to be exposed, we create a Headless Service. 
+
 `kubectl apply -f services.yml`
 
 4. **Stateful Set**
 RabbitMQ requires using a K8s Stateful Set to deploy a RabbitMQ cluster to Kubernetes. The Stateful Set ensures that the RabbitMQ nodes are deployed in order, one at a time. This avoids running into a potential peer discovery race condition when deploying a multi-node RabbitMQ cluster.
 Some other reasons for using a Stateful Set instead of a Deployment are: sticky identity, simple network identifiers, stable persistent storage and the ability to perform ordered rolling upgrades. The Stateful Set definition file is packed with detail such as mounting configuration, mounting credentials, opening ports, etc. 
-`kubectl apply -f statefulset`
+
+`kubectl apply -f statefulset.yml`
 
 5. **Persistent Volume**
 In order for RabbitMQ nodes to retain data between Pod restarts, node's data directory must use durable storage. A Persistent Volume must be attached to each RabbitMQ Pod.
@@ -33,6 +38,7 @@ In our statefulset.yaml example, we create a Persistent Volume Claim to provisio
 
 6. **Node Configuration**
 The recommended way to configure a R-MQ node is to use the configuration file, which can be expressed as Config-Map and mounted as a Volume onto the R-MQ pods.
+
 `kubectl apply -f configmap.yaml`
 
 #### Ports
@@ -52,8 +58,8 @@ The sample Sender-Receiver Java program uses AMQP 0-9-1 protocol, which is an op
 Here's the link for these libraries:
 1. [AMQP Client Library](https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.7.1/amqp-client-5.7.1.jar)
 2. Dependencies for client libraries includes:
-[SLF4J API](https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.26/slf4j-api-1.7.26.jar)
-[SLF4J Simple](https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.26/slf4j-simple-1.7.26.jar)
+* [SLF4J API](https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.26/slf4j-api-1.7.26.jar)
+* [SLF4J Simple](https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.26/slf4j-simple-1.7.26.jar)
 
 The client library and it's dependency will be in the same working directory. 
 
@@ -75,13 +81,16 @@ Please note:
 
 
 `java -cp .:amqp-client-5.7.1.jar:slf4j-api-1.7.26.jar:slf4j-simple-1.7.26.jar RecvK8s`
+
 `java -cp .:amqp-client-5.7.1.jar:slf4j-api-1.7.26.jar:slf4j-simple-1.7.26.jar SendK8s`
 
 
 Alternatively, we can set the env variable with rabbitmq client and it's dependency 
 
 `export CP=.:amqp-client-5.7.1.jar:slf4j-api-1.7.26.jar:slf4j-simple-1.7.26.jar`
+
 `java -cp $CP RecvK8s`
+
 `java -cp $CP SendK8s`
 
 
