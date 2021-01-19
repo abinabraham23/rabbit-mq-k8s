@@ -61,13 +61,13 @@ Here's the link for these libraries:
 * [SLF4J API](https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.26/slf4j-api-1.7.26.jar)
 * [SLF4J Simple](https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.26/slf4j-simple-1.7.26.jar)
 
-The client library and it's dependency will be in the same working directory. 
+The client library and it's dependency must be in the same working directory. 
 
 
 ## Sample Java Program (Sender-Receiver)
 
-1. SendK8s.java: simple java program to send "Hello World!" to queue "hello".
-2. RecvK8s.java: simple java program to read the message from queue "hello".
+1. **SendK8s.java**: simple java program to send "Hello World!" to queue "hello".
+2. **RecvK8s.java**: simple java program to read the message from queue "hello".
 
 Please note:
 * host value (under setHost) will be replaced with the node ip (in case of NodePort), we can get the value from "minikube ip".
