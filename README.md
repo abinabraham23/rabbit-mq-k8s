@@ -24,22 +24,23 @@ RabbitMQ uses port 4369 for node discovery and port 25672 for inter-node communi
 
 `kubectl apply -f services.yml`
 
-4. **Stateful Set**
+4. **Node Configuration**
+The recommended way to configure a R-MQ node is to use the configuration file, which can be expressed as Config-Map and mounted as a Volume onto the R-MQ pods.
+
+`kubectl apply -f configmap.yaml`
+
+5. **Stateful Set**
 RabbitMQ requires using a K8s Stateful Set to deploy a RabbitMQ cluster to Kubernetes. The Stateful Set ensures that the RabbitMQ nodes are deployed in order, one at a time. This avoids running into a potential peer discovery race condition when deploying a multi-node RabbitMQ cluster.
 Some other reasons for using a Stateful Set instead of a Deployment are: sticky identity, simple network identifiers, stable persistent storage and the ability to perform ordered rolling upgrades. The Stateful Set definition file is packed with detail such as mounting configuration, mounting credentials, opening ports, etc. 
 
 `kubectl apply -f statefulset.yml`
 
-5. **Persistent Volume**
+6. **Persistent Volume**
 In order for RabbitMQ nodes to retain data between Pod restarts, node's data directory must use durable storage. A Persistent Volume must be attached to each RabbitMQ Pod.
 If a transient volume is used to back a RabbitMQ node, the node will lose its identity and all of its local data in case of a restart. This includes both schema and durable queue data.
 In our statefulset.yaml example, we create a Persistent Volume Claim to provision a Persistent Volume.
   The Persistent Volume is mounted at /var/lib/rabbitmq/mnesia. This path is used for a RABBITMQ_MNESIA_BASE location: the base directory for all persistent data of a node. A description of default file paths for RabbitMQ can be found in the RabbitMQ documentation. Node's data directory base can be changed using the RABBITMQ_MNESIA_BASE variable if needed. Make sure to mount a Persistent Volume at the updated path.
 
-6. **Node Configuration**
-The recommended way to configure a R-MQ node is to use the configuration file, which can be expressed as Config-Map and mounted as a Volume onto the R-MQ pods.
-
-`kubectl apply -f configmap.yaml`
 
 #### Ports
 Protocols supported by RabbitMQ are all TCP-based and require the protocol ports to be opened on the RabbitMQ nodes. Depending on the plugins that are enabled on a node, the list of required ports can vary. The example enabled_plugins file mentioned above enables a few plugins: rabbitmq_peer_discovery_k8s (mandatory), rabbitmq_management and rabbitmq_prometheus. Therefore, the service must open several ports relevant for the core server and the enabled plugins:
