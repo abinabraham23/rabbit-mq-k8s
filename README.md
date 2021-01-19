@@ -93,9 +93,3 @@ Alternatively, we can set the env variable with rabbitmq client and it's depende
 
 `java -cp $CP SendK8s`
 
-
-
-
-
-
-
